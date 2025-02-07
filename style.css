@@ -33,6 +33,7 @@
 }
 
 .container {
+    display: none;
     height: 90%;
     width: 40%;
     position: relative; /* Faz o conteúdo ficar acima do overlay */

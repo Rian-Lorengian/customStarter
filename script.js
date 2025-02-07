@@ -62,26 +62,109 @@ class dataHora {
 
     }
 
-    atualizarClima() {
-        const apiKey = "c48d97cd1032cbacf0f20cc5292a985c"; // Substitua pela sua API Key
-        const cidade = "São Paulo"; // Altere para a cidade desejada
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${cidade}&appid=${apiKey}&units=metric&lang=pt`;
-
-        fetch(url)
-        .then(response => {
+    async getClimaAtual() {
+        const apiKey = "c48d97cd1032cbacf0f20cc5292a985c";
+        const lat = '-27.9499376';
+        const lon = '-51.8074435';
+        const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt`;
+    
+        try {
+            const response = await fetch(url);
             if (!response.ok) {
-            throw new Error("Erro ao buscar os dados");
+                throw new Error("Erro ao buscar os dados");
             }
-            return response.json();
-        })
-        .then(data => {
-            console.log(`Cidade: ${data.name}`);
-            console.log(`Temperatura: ${data.main.temp}°C`);
-            console.log(`Clima: ${data.weather[0].description}`);
-        })
-        .catch(error => console.error("Erro:", error));
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Erro:", error);
+            return null;
+        }
+    }
+    
 
+    async getPrevisaoProximasHoras() {
+        const apiKey = "c48d97cd1032cbacf0f20cc5292a985c";
+        const lat = '-27.9499376';
+        const lon = '-51.8074435';
+        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt`;
+    
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error("Erro ao buscar a previsão");
             }
+            const data = await response.json();
+            
+
+            const primeiraPrevisao = data.list[0];
+            const descricaoPrevisao = (primeiraPrevisao.weather[0].description);
+            const temperaturaPrevisao = Math.round(primeiraPrevisao.main.temp);
+    
+            return { descricaoPrevisao, temperaturaPrevisao };
+        } catch (error) {
+            console.error("Erro na previsão:", error);
+            return null;
+        }
+    }
+    
+
+    async atualizarClima() {
+        const climaAtual = await this.getClimaAtual();
+        const previsao = await this.getPrevisaoProximasHoras();
+    
+        if (climaAtual && previsao) {
+            const icone = climaAtual.weather[0].icon;
+            const descricaoAtual = this.capitalizarPrimeiraLetra(climaAtual.weather[0].description);
+            
+            const temperaturaAtual = Math.round(climaAtual.main.temp);
+            
+            document.getElementById('icone').src = `https://openweathermap.org/img/wn/${icone}@2x.png`;
+            document.getElementById('temp').innerText = `${temperaturaAtual}º`;
+            document.getElementById('clima').innerHTML = `
+                ${descricaoAtual}. Atualmente faz ${temperaturaAtual}ºC <br>
+                Para as próximas horas, o clima será de ${previsao.descricaoPrevisao}.
+            `;
+            document.querySelector(".container").style.display = "block"; 
+        }
+    }
+
+    async buscarImagem(query) {
+        const horaAtual = new Date().getHours();
+        const ultimaHora = localStorage.getItem("ultimaHora");
+    
+
+        if (!ultimaHora || ultimaHora != horaAtual) {
+            const url = `https://api.unsplash.com/photos/random?query=nature&client_id=SUA_CHAVE_AQUI`;
+    
+            try {
+                const resposta = await fetch(url);
+                const dados = await resposta.json();
+                const imagemUrl = dados.urls.full;
+    
+                localStorage.setItem("imagemUnsplash", imagemUrl);
+                localStorage.setItem("ultimaHora", horaAtual);
+                document.main.style.backgroundImage = `url(${imagemUrl})`;
+            } catch (erro) {
+                console.error("Erro ao buscar imagem do Unsplash", erro);
+            }
+        } else {
+            // Se a hora for a mesma, usa a imagem já armazenada
+            document.main.style.backgroundImage = `url(${localStorage.getItem("imagemUnsplash")})`;
+        }
+    }
+    
+
+    capitalizarPrimeiraLetra(texto) {
+        return texto.charAt(0).toUpperCase() + texto.slice(1);
+    }
+
+        
+
+
+
+        
+    
+
 
 }
 
