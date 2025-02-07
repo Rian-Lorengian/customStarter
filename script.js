@@ -3,6 +3,7 @@ class dataHora {
     constructor() {
         this.agora = '';
         this.minute = '';
+        this.hour = '';
 
         this.getDataAtual();
         setInterval(this.getDataAtual.bind(this), 1000); 
@@ -15,6 +16,7 @@ class dataHora {
     }
 
     getDataAtual() {
+        this.atualizarProgresso();
         this.agora = new Date();
 
         if(this.minute == '') {
@@ -23,6 +25,17 @@ class dataHora {
             if(this.agora.getMinutes() != this.minute) {
                 this.minute = this.agora.getMinutes()
                 this.atualizarHora();
+            }
+        }
+        if(this.hour == '') {
+            this.hour = this.agora.getHours();
+        } else {
+            if(this.agora.getHours() != this.hour) {
+                this.hour = this.agora.getHours()
+                this.atualizarSaudacao();
+                this.atualizarClima();
+                this.atualizarTitulo();
+                this.buscarImagem();
             }
         }
     }
@@ -206,17 +219,61 @@ class dataHora {
             }
         } else {
             const feriado = localStorage.getItem("feriadoHoje");
-
             document.getElementById('feriado').innerText = feriado
-            
-
         }
-
-
-
-
     }
-    
+
+    atualizarProgresso() {
+        const now = new Date();
+        
+        // Hora
+        const startOfHour = new Date(now);
+        startOfHour.setMinutes(0, 0, 0);
+        const endOfHour = new Date(startOfHour);
+        endOfHour.setHours(startOfHour.getHours() + 1);
+        const hourProgress = ((now - startOfHour) / (endOfHour - startOfHour)) * 100;
+        
+        // Dia
+        const startOfDay = new Date(now);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(now);
+        endOfDay.setHours(23, 59, 59, 999);
+        const dayProgress = ((now - startOfDay) / (endOfDay - startOfDay)) * 100;
+
+        // Semana
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay() + 1);
+        startOfWeek.setHours(0, 0, 0, 0);
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 4);
+        endOfWeek.setHours(23, 59, 59, 999);
+        const weekProgress = ((now - startOfWeek) / (endOfWeek - startOfWeek)) * 100;
+
+        // Ano
+        const startOfYear = new Date(now.getFullYear(), 0, 1);
+        const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+        const yearProgress = ((now - startOfYear) / (endOfYear - startOfYear)) * 100;
+
+        // Atualizar textos
+        document.getElementById("hour-text").innerText = 'HORA ' + Math.round(hourProgress) + "%";
+        document.getElementById("day-text").innerText = 'DIA ' + Math.round(dayProgress) + "%";
+        document.getElementById("week-text").innerText = 'SEMANA ' + Math.round(weekProgress) + "%";
+        document.getElementById("year-text").innerText = 'ANO ' + Math.round(yearProgress) + "%";
+    }
+
+    atualizarTitulo() {
+        let hora = new Date().getHours();
+        let titulo;
+
+        if (hora >= 5 && hora < 12) {
+            titulo = "good morning☕️";
+        } else if (hora >= 12 && hora < 18) {
+            titulo = "good afternoon☀️";
+        } else {
+            titulo = "good night🌃";
+        }
+        document.title = titulo;
+    }
 
     capitalizarPrimeiraLetra(texto) {
         return texto.charAt(0).toUpperCase() + texto.slice(1);

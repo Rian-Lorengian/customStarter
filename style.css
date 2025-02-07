@@ -58,6 +58,12 @@
 .low {
     height: 25%;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: Arial, sans-serif;
 }
 
 #hora {
@@ -168,3 +174,23 @@
     text-align: center;
 }
 
+.progress-container {
+    width: 50%;
+    position: relative;
+    margin: 10px 0;
+}
+.progress-bar {
+    height: 2px;
+    background-color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 25%;
+    transition: width 0.5s ease-in-out;
+}
+.progress-text {
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 25px;
+}
