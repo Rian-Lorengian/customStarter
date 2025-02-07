@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <script>
+        function atualizarTitulo() {
+            let hora = new Date().getHours();
+            let titulo;
+
+            if (hora >= 5 && hora < 12) {
+                titulo = "good morning☕️";
+            } else if (hora >= 12 && hora < 18) {
+                titulo = "good afternoon☀️";
+            } else {
+                titulo = "good night🌃";
+            }
+            document.title = titulo; // Atualiza o título da página
+        }
+        window.onload = atualizarTitulo;
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main">
+        <div class="container">
+            <div class="upper">
+                <div class="hora-dia">
+                    <h2 id="hora">00:00</h2>
+                    <p id="dia">dia, 0 de 0 de 0</p>
+                </div>
+            </div>
+
+            <div class="mid">
+                <div class="mid-1">
+                    <h2 class="salute" id="salute">
+                        ?
+                    </h2>
+                    <p class="clima">Nublado e chuva forte. Atualmente faz 23º <br> e a máxima amanhã é de 32º.</p>
+                    <span class="icone-temp">
+                        <img src="https://openweathermap.org/img/wn/02n@2x.png" class="icone">
+                        <p class="temp">21º</p>
+                    </span> 
+                </div>
+
+
+            </div>
+
+            <div class="low">
+
+            </div>
+        </div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color: #fff;
+}
+
+.main {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background: url('https://images.unsplash.com/photo-1738258644135-29aa538dfa6f?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex; /* Mantém o conteúdo organizado */
+    align-items: center;
+    justify-content: center;
+    color: white; /* Deixa o texto visível */
+}
+
+.main::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Escurece o fundo */
+    backdrop-filter: blur(5px);
+    z-index: 1; /* Mantém o overlay atrás do conteúdo */
+}
+
+.container {
+    height: 90%;
+    width: 40%;
+    position: relative; /* Faz o conteúdo ficar acima do overlay */
+    z-index: 2;
+}
+
+.upper {
+    height: 25%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.mid {
+    /* border: 1px solid blue; */
+    height: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.low {
+    height: 25%;
+    width: 100%;
+}
+
+#hora {
+    font-family: "Inter", serif;
+    font-optical-sizing: auto;
+    font-weight: 100;
+    font-style: normal;
+    font-size: 3em;
+    text-align: center;
+    padding: 0;
+}
+
+#dia {
+    font-family: "Inter", serif;
+    font-optical-sizing: auto;
+    font-weight: 100;
+    font-style: normal;
+    font-size: 0.75em;
+    text-align: center;
+}
+
+.salute {
+    font-family: "Inter", serif;
+    font-optical-sizing: auto;
+    font-weight: 200;
+    font-style: normal;
+    font-size: 2em;
+    text-align: center;
+    padding: 0;
+}
+
+.clima {
+    font-family: "Inter", serif;
+    font-optical-sizing: auto;
+    font-weight: 100;
+    font-style: normal;
+    font-size: 1em;
+    text-align: center;
+    padding: 0;
+}
+
+.icone {
+    text-align: center;
+    height: 50px;
+}
+
+.mid-1 {
+    display: flex;
+    flex-direction: column; /* Organiza os elementos em coluna */
+    align-items: center; /* Centraliza horizontalmente */
+    justify-content: center; /* Centraliza verticalmente */
+    text-align: center; /* Para alinhar textos */
+}
+
+.icone-temp {
+    display: flex;
+    align-items: center; /* Alinha verticalmente */
+}
+
+.temp {
+    font-family: "Inter", serif;
+    font-optical-sizing: auto;
+    font-weight: 150;
+    font-style: normal;
+    font-size: 1.25em;
+    text-align: center;
+    padding: 0;
+}
