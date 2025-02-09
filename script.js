@@ -16,7 +16,6 @@ class dataHora {
     }
 
     getDataAtual() {
-        this.atualizarProgresso();
         this.agora = new Date();
 
         if(this.minute == '') {
@@ -100,8 +99,8 @@ class dataHora {
         const apiKey = "c48d97cd1032cbacf0f20cc5292a985c";
         const lat = '-27.9499376';
         const lon = '-51.8074435';
-        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt`;
-    
+        const url = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric&lang=pt&cnt=1`;
+
         try {
             const response = await fetch(url);
             if (!response.ok) {
@@ -123,70 +122,98 @@ class dataHora {
     
 
     async atualizarClima() {
-        const climaAtual = await this.getClimaAtual();
-        const previsao = await this.getPrevisaoProximasHoras();
+        try {
+            const [climaAtual, previsao] = await Promise.all([
+                this.getClimaAtual(),
+                this.getPrevisaoProximasHoras()
+            ]);
     
-        if (climaAtual && previsao) {
-            const icone = climaAtual.weather[0].icon;
-            const descricaoAtual = this.capitalizarPrimeiraLetra(climaAtual.weather[0].description);
-            
+            if (!climaAtual || !previsao) return;
+    
+            const { icon, description } = climaAtual.weather[0];
+            const descricaoAtual = this.capitalizarPrimeiraLetra(description);
             const temperaturaAtual = Math.round(climaAtual.main.temp);
-            
-            document.getElementById('icone').src = `https://openweathermap.org/img/wn/${icone}@2x.png`;
+            const descricaoPrevisao = previsao.descricaoPrevisao.toLowerCase();
+    
+            document.getElementById('icone').src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
             document.getElementById('temp').innerText = `${temperaturaAtual}º`;
+    
+            let ocorrencia = 'será de';
+            const ocorrenciasEspeciais = ['nublado'];
+    
+            if (ocorrenciasEspeciais.includes(descricaoPrevisao)) {
+                ocorrencia = 'estará';
+            }
+    
+            if (descricaoAtual.toLowerCase() === descricaoPrevisao) {
+                ocorrencia = ocorrencia === 'estará' ? 'permanecerá' : 'permanecerá com';
+            }
+    
             document.getElementById('clima').innerHTML = `
                 ${descricaoAtual}. Atualmente faz ${temperaturaAtual}ºC <br>
-                Para as próximas horas, o clima será de ${previsao.descricaoPrevisao}.
+                Para as próximas horas, o clima ${ocorrencia} ${previsao.descricaoPrevisao}.
             `;
-            document.querySelector(".container").style.display = "block"; 
+    
+            document.querySelector(".container").style.display = "block";
             this.buscarImagem();
+        } catch (error) {
+            console.error("Erro ao atualizar o clima:", error);
         }
     }
 
     async buscarImagem() {
-        const horaAtual = this.agora.getHours();
-        const ultimaHora = localStorage.getItem("ultimaHora");
-        const key = 'd0jLuZNi4lsVcYgvT43daJAVz4zWoKGgEky870rKuSk';
+        try {
+            const horaAtual = this.agora.getHours();
+            const ultimaHora = localStorage.getItem("ultimaHora");
+            const key = 'd0jLuZNi4lsVcYgvT43daJAVz4zWoKGgEky870rKuSk';
     
-        if (!ultimaHora || ultimaHora != horaAtual) {
-
+            // Se a imagem já foi carregada na mesma hora, usa a armazenada
+            if (ultimaHora && ultimaHora == horaAtual) {
+                return this.aplicarImagemDeFundo(localStorage.getItem("imagemUnsplash"));
+            }
+    
             const keywords = [
-                "night", "river", "city", "background", "montain"
-              ];
-              
-              const randomIndex = Math.floor(Math.random() * keywords.length);
-              
-              const randomKeyword = keywords[randomIndex];
-              
+                "night", "river", "city", "mountain", "sunset", "forest", "ocean", "desert",
+                "stars", "skyline", "mist", "sunrise", "waterfall", "beach", "valley", 
+                "lake", "nebula", "canyon", "aurora", "clouds", "moonlight", "island", 
+                "rain", "snow", "autumn", "spring", "winter", "summer", "galaxy", 
+                "tropical", "village", "landscape", "horizon", "panorama", "reflection", 
+                "wildlife", "waves", "glacier", "volcano", "meadow", "field", "cliff", 
+                "countryside", "path", "garden", "bamboo", "palm trees", "coral reef", 
+                "castle", "bridge", "harbor", "sky", "dusk", "dawn", "highway", "street", 
+                "alley", "tower", "lighthouse", "cave", "temple", "zen", "peaceful", 
+                "majestic", "dreamy", "mystical", "colorful"
+            ];
+    
+            const randomKeyword = keywords[Math.floor(Math.random() * keywords.length)];
+            console.log(randomKeyword)
             const url = `https://api.unsplash.com/photos/random?query=${randomKeyword}&orientation=landscape&client_id=${key}`;
     
-            try {
-                const resposta = await fetch(url);
-                const dados = await resposta.json();
-                const imagemUrl = dados.urls.regular; 
+            const resposta = await fetch(url);
+            if (!resposta.ok) throw new Error(`Erro na requisição: ${resposta.status}`);
     
-                // Salva no localStorage para evitar novas requisições na mesma hora
+            const dados = await resposta.json();
+            const imagemUrl = dados.urls?.regular;
+    
+            if (imagemUrl) {
                 localStorage.setItem("imagemUnsplash", imagemUrl);
                 localStorage.setItem("ultimaHora", horaAtual);
-    
-                // Aplica a imagem corretamente no background
-                document.getElementById('main').style.background = `url('${imagemUrl}')`;
-                document.getElementById('main').style.backgroundSize = "cover"; // Garante que ocupe a tela toda
-                document.getElementById('main').style.backgroundPosition = "center";
-                document.getElementById('loading').style.display = "none";
-            } catch (erro) {
-                console.error("Erro ao buscar imagem do Unsplash", erro);
+                this.aplicarImagemDeFundo(imagemUrl);
             }
-        } else {
-            // Usa a imagem já armazenada
-            const imagemSalva = localStorage.getItem("imagemUnsplash");
-            document.getElementById('main').style.background = `url('${imagemSalva}')`;
-            document.getElementById('main').style.backgroundSize = "cover"; // Garante que ocupe a tela toda
-            document.getElementById('main').style.backgroundPosition = "center";
-            document.getElementById('loading').style.display = "none";
-
+        } catch (erro) {
+            console.error("Erro ao buscar imagem do Unsplash:", erro);
         }
     }
+    
+    aplicarImagemDeFundo(imagemUrl) {
+        if (!imagemUrl) return;
+        
+        const main = document.getElementById('main');
+        main.style.background = `url('${imagemUrl}') no-repeat center/cover`;
+        
+        document.getElementById('loading').style.display = "none";
+    }
+    
 
     async buscarFeriado() {
         const diaArmazenado = localStorage.getItem("diaArmazenado");
@@ -223,44 +250,6 @@ class dataHora {
         }
     }
 
-    atualizarProgresso() {
-        const now = new Date();
-        
-        // Hora
-        const startOfHour = new Date(now);
-        startOfHour.setMinutes(0, 0, 0);
-        const endOfHour = new Date(startOfHour);
-        endOfHour.setHours(startOfHour.getHours() + 1);
-        const hourProgress = ((now - startOfHour) / (endOfHour - startOfHour)) * 100;
-        
-        // Dia
-        const startOfDay = new Date(now);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(now);
-        endOfDay.setHours(23, 59, 59, 999);
-        const dayProgress = ((now - startOfDay) / (endOfDay - startOfDay)) * 100;
-
-        // Semana
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay() + 1);
-        startOfWeek.setHours(0, 0, 0, 0);
-        const endOfWeek = new Date(startOfWeek);
-        endOfWeek.setDate(startOfWeek.getDate() + 4);
-        endOfWeek.setHours(23, 59, 59, 999);
-        const weekProgress = ((now - startOfWeek) / (endOfWeek - startOfWeek)) * 100;
-
-        // Ano
-        const startOfYear = new Date(now.getFullYear(), 0, 1);
-        const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-        const yearProgress = ((now - startOfYear) / (endOfYear - startOfYear)) * 100;
-
-        // Atualizar textos
-        document.getElementById("hour-text").innerText = 'HORA ' + Math.round(hourProgress) + "%";
-        document.getElementById("day-text").innerText = 'DIA ' + Math.round(dayProgress) + "%";
-        document.getElementById("week-text").innerText = 'SEMANA ' + Math.round(weekProgress) + "%";
-        document.getElementById("year-text").innerText = 'ANO ' + Math.round(yearProgress) + "%";
-    }
-
     atualizarTitulo() {
         let hora = new Date().getHours();
         let titulo;
@@ -274,6 +263,7 @@ class dataHora {
         }
         document.title = titulo;
     }
+
 
     capitalizarPrimeiraLetra(texto) {
         return texto.charAt(0).toUpperCase() + texto.slice(1);
